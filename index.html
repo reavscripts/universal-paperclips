@@ -9434,7 +9434,7 @@ function load() {
         swarmGifts = loadGame.swarmGifts;
         nextGift = loadGame.nextGift;
         giftPeriod = loadGame.giftPeriod;
-        giftCountdown = loadGame.giftCountdown;
+        giftCountdown = loadGame.giftCountdown === null ? Infinity : loadGame.giftCountdown;
         elapsedTime = loadGame.elapsedTime;
     
         maxFactoryLevel = loadGame.maxFactoryLevel;
@@ -9760,7 +9760,7 @@ function load1() {
         swarmGifts = loadGame.swarmGifts;
         nextGift = loadGame.nextGift;
         giftPeriod = loadGame.giftPeriod;
-        giftCountdown = loadGame.giftCountdown;
+        giftCountdown = loadGame.giftCountdown === null ? Infinity : loadGame.giftCountdown;
         elapsedTime = loadGame.elapsedTime;    
     
         maxFactoryLevel = loadGame.maxFactoryLevel;
@@ -10066,7 +10066,7 @@ function load2() {
         swarmGifts = loadGame.swarmGifts;
         nextGift = loadGame.nextGift;
         giftPeriod = loadGame.giftPeriod;
-        giftCountdown = loadGame.giftCountdown;
+        giftCountdown = loadGame.giftCountdown === null ? Infinity : loadGame.giftCountdown;
         elapsedTime = loadGame.elapsedTime;    
     
         maxFactoryLevel = loadGame.maxFactoryLevel;
@@ -10675,10 +10675,13 @@ function loadPrestige() {
     // Normalize this known field before comparing saves from different phases.
     if(typeof game.sliderPos==='string'&&game.sliderPos.trim()!==''&&Number.isFinite(Number(game.sliderPos)))game.sliderPos=Number(game.sliderPos);
     if(!Number.isFinite(game.sliderPos)||game.sliderPos<0||game.sliderPos>200)throw Error('Invalid swarm slider position.');
+    // JSON serializes the infinite wait at 0% thinking as null.
+    // Only this derived timer accepts that sentinel; other numeric fields stay strict.
+    if(game.giftCountdown!==null&&!Number.isFinite(game.giftCountdown))throw Error('The save file contains an invalid value for giftCountdown.');
     const current=JSON.parse(localStorage.getItem('saveGame'));
     for(const k of Object.keys(current)) {
       if(!(k in game)) throw Error('The save file is incomplete.');
-      if(typeof current[k] === 'number' && (typeof game[k] !== 'number' || !Number.isFinite(game[k]))) throw Error('The save file contains an invalid value for '+k+'.');
+      if(typeof current[k] === 'number' && !(k==='giftCountdown'&&game[k]===null) && (typeof game[k] !== 'number' || !Number.isFinite(game[k]))) throw Error('The save file contains an invalid value for '+k+'.');
       if(Array.isArray(current[k]) && !Array.isArray(game[k])) throw Error('The save file contains invalid data.');
     }
     for(const k of ['saveProjectsUses','saveProjectsFlags']) if(!Array.isArray(parsed[k]) || parsed[k].length !== projects.length || !parsed[k].every(Number.isFinite)) throw Error('Incompatible project data.');
