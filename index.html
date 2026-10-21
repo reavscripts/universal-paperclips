@@ -176,7 +176,7 @@ catch(e){window.upcTemporaryStorage=true;const memory=new Map();Object.definePro
         </div><div class="clip-caption">Every paperclip counts.</div><div class="make-wrap" id="makeWrap"><button class="button2" id="btnMakePaperclip" onclick="clipClick(1)">Make Paperclip</button></div></div>
 <section id="activity" class="activity" aria-label="Activity log"><div class="section-label"><span class="activity-title"><svg class="icon" aria-hidden="true"><use href="#i-terminal"></use></svg> System activity</span><span class="live-label"><span class="dot"></span>LIVE FEED</span></div><div id="consoleDiv" role="log" aria-live="polite"><div class="console-line console-old" hidden><span class="console-prefix">·</span><span id="readout5"></span></div><div class="console-line console-old" hidden><span class="console-prefix">·</span><span id="readout4"></span></div><div class="console-line console-old" hidden><span class="console-prefix">·</span><span id="readout3"></span></div><div class="console-line console-old" hidden><span class="console-prefix">·</span><span id="readout2"></span></div><div class="console-line latest"><span class="console-prefix">&gt;</span><span><span id="readout1">Welcome to Universal Paperclips</span><span id="cursor" class="pulsate">_</span></span></div></div></section>
 <div class="hero-art" id="heroArt" aria-hidden="true"><svg viewBox="0 0 230 260" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="metal" x1="0" y1="0" x2="1" y2=".5"><stop stop-color="#536746"/><stop offset=".23" stop-color="#d9ecb5"/><stop offset=".43" stop-color="#a2b78b"/><stop offset=".62" stop-color="#e7f5d0"/><stop offset="1" stop-color="#769763"/></linearGradient></defs><circle cx="115" cy="128" r="96" fill="none" stroke="#a1be7c" stroke-opacity=".09"/><circle cx="115" cy="128" r="75" fill="none" stroke="#a1be7c" stroke-opacity=".09"/><path d="M151 166V64a40 40 0 0 0-80 0v135a55 55 0 0 0 110 0V84" fill="none" stroke="#0e1b0b" stroke-width="11" stroke-linecap="round" transform="translate(3 5)"/><path d="M151 166V64a40 40 0 0 0-80 0v135a55 55 0 0 0 110 0V84" fill="none" stroke="url(#metal)" stroke-width="8" stroke-linecap="round"/><path d="M101 82v112a10 10 0 0 0 20 0V64" fill="none" stroke="#101c0d" stroke-width="11" stroke-linecap="round" transform="translate(3 5)"/><path d="M101 82v112a10 10 0 0 0 20 0V64" fill="none" stroke="url(#metal)" stroke-width="8" stroke-linecap="round"/></svg><small>FORM / FUNCTION / INFINITY</small></div></div>
-<div class="hero-stats"><div class="hero-stat"><div class="hero-stat-label"><svg class="icon" aria-hidden="true"><use href="#i-bolt"></use></svg> Production rate</div><div class="hero-stat-value"><span id="heroRate">0</span><span class="hero-stat-unit">clips / sec</span></div></div><div class="hero-stat"><div class="hero-stat-label"><svg class="icon" aria-hidden="true"><use href="#i-wire"></use></svg> Wire available</div><div class="hero-stat-value"><span id="heroWire">1000</span><span class="hero-stat-unit" id="heroWireUnit">inches</span></div></div><div class="hero-stat"><div class="hero-stat-label"><svg class="icon" aria-hidden="true"><use href="#i-wallet"></use></svg><span id="heroFundsLabel">Available funds</span></div><div class="hero-stat-value"><span id="heroFundsPrefix">$</span><span id="heroFunds">0</span></div></div></div></section>
+<div class="hero-stats"><div class="hero-stat"><div class="hero-stat-label"><svg class="icon" aria-hidden="true"><use href="#i-bolt"></use></svg> Production rate</div><div class="hero-stat-value"><span id="heroRate">0</span><span class="hero-stat-unit">clips / sec</span></div></div><div class="hero-stat"><div class="hero-stat-label"><svg class="icon" aria-hidden="true"><use href="#i-wire"></use></svg> Wire available</div><div class="hero-stat-value"><span id="heroWire">1000</span><span class="hero-stat-unit" id="heroWireUnit">inches</span></div></div><div class="hero-stat"><div class="hero-stat-label"><svg class="icon" aria-hidden="true"><use href="#i-wallet"></use></svg><span id="heroFundsLabel">Available funds</span></div><div class="hero-stat-value"><span id="heroFundsPrefix">$</span><span id="heroFunds">0</span></div></div></div><div class="hero-stats hero-resource-stats" id="heroResourceStats" hidden><div class="hero-stat" id="heroResearchStat" hidden><div class="hero-stat-label">Ready to research</div><div class="hero-stat-value"><span id="heroResearch">0</span></div></div><div class="hero-stat" id="heroPowerProductionStat" hidden><div class="hero-stat-label">Production</div><div class="hero-stat-value"><span id="heroPowerProduction">0</span><span class="hero-stat-unit">MWs</span></div></div><div class="hero-stat" id="heroPowerConsumptionStat" hidden><div class="hero-stat-label">Consumption</div><div class="hero-stat-value"><span id="heroPowerConsumption">0</span><span class="hero-stat-unit">MWs</span></div></div></div></section>
 <section id="resources" aria-label="Resources and controls"><div class="section-label"><span>OPERATIONS</span><small>Your production at a glance</small></div><div id="game-grid"><div id="leftColumn">
         
         <br>
@@ -10517,11 +10517,11 @@ function loadPrestige() {
   const floating=document.createElement('aside');
   floating.className='floating-stats';floating.hidden=true;floating.setAttribute('aria-label','Resource summary');
   document.querySelector('.topbar').after(floating);
-  const tracked=[['heroRate','Production rate',' clips / sec'],['heroWire','Wire available',' inches'],['heroFunds','Unused clips',''],['yomiDisplay','Yomi',''],['projectsReady','Ready to research','',true],['powerProductionRate','Production',' MWs',true],['powerConsumptionRate','Consumption',' MWs',true]].map(([id,label,unit,trackBelow=false])=>{
+  const tracked=[['heroRate','Production rate',' clips / sec'],['heroWire','Wire available',' inches'],['heroFunds','Unused clips',''],['yomiDisplay','Yomi',''],['projectsReady','Ready to research',''],['powerProductionRate','Production',' MWs'],['powerConsumptionRate','Consumption',' MWs']].map(([id,label,unit])=>{
     const item=document.createElement('div');item.className='floating-stat';item.hidden=true;
     const heading=document.createElement('span');heading.textContent=label;
     const value=document.createElement('strong');item.append(heading,value);floating.append(item);
-    return {id,unit,item,value,trackBelow};
+    return {id,unit,item,value};
   });
   function renderFloating(){
     const edge=document.querySelector('.topbar').getBoundingClientRect().bottom;
@@ -10529,7 +10529,7 @@ function loadPrestige() {
     for(const entry of tracked){
       const source=$(entry.id),rect=source.getBoundingClientRect();
       const visible=source.getClientRects().length>0&&getComputedStyle(source).visibility==='visible';
-      const outside=rect.bottom<=edge||(entry.trackBelow&&rect.top>=window.innerHeight);
+      const outside=rect.bottom<=edge;
       entry.item.hidden=!visible||!outside||(entry.id==='heroFunds'&&window.humanFlag===1);
       if(!entry.item.hidden)entry.value.textContent=source.textContent+entry.unit;
     }
@@ -10537,7 +10537,17 @@ function loadPrestige() {
   }
   let scrollFrame=0;
   window.addEventListener('scroll',()=>{if(!scrollFrame)scrollFrame=requestAnimationFrame(()=>{scrollFrame=0;renderFloating();});},{passive:true});
-  window.upcRenderDashboard=()=>{render();renderFloating();};
+  function renderHeroResources(){
+    let showing=false;
+    for(const [sourceId,targetId] of [['projectsReady','heroResearch'],['powerProductionRate','heroPowerProduction'],['powerConsumptionRate','heroPowerConsumption']]){
+      const source=$(sourceId);
+      const available=source.getClientRects().length>0&&getComputedStyle(source).visibility==='visible';
+      $(targetId+'Stat').hidden=!available;
+      if(available){text(targetId,source.textContent);showing=true;}
+    }
+    $('heroResourceStats').hidden=!showing;
+  }
+  window.upcRenderDashboard=()=>{render();renderHeroResources();renderFloating();};
   window.addEventListener('resize',window.upcRenderDashboard);
 })();
 
