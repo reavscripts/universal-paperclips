@@ -128,6 +128,27 @@ body[data-phase=production] #swarmGiftDiv,body[data-phase=space] #swarmGiftDiv{m
 .floating-stats{position:fixed;top:58px;left:0;right:0;z-index:19;display:flex;flex-wrap:wrap;background:var(--surface);border-bottom:1px solid var(--line);box-shadow:0 6px 16px #0002;padding:8px 18px;gap:8px 24px}.floating-stat{flex:1 1 125px;min-width:0}.floating-stat span{display:block;font-size:9px;color:var(--muted);margin-bottom:4px}.floating-stat strong{font:11px var(--mono);overflow-wrap:anywhere;color:var(--ink)}
 .power-instrument .energy-columns{margin-top:16px}.power-instrument .energy-columns strong{font-size:clamp(20px,2.2vw,30px);line-height:1.4;color:var(--instrument-ink)}.power-instrument .energy-columns small{display:block;font-size:10px}.power-headline{justify-content:flex-end}.battery-gauge{padding:14px;border:1px solid var(--line);border-radius:8px;background:var(--surface2)}.battery-gauge .demand-row{margin-top:0;font-size:11px}.battery-gauge .meter{height:16px;margin:12px 0 8px;border:1px solid #718165;background:#cdd5c4;border-radius:5px}.battery-gauge .meter-fill{background:#4d7525;border-radius:3px}:root[data-theme=dark] .battery-gauge .meter{background:#0f1811;border-color:#63765a}:root[data-theme=dark] .battery-gauge .meter-fill{background:#d2f86b}.storage-caption{display:flex;justify-content:space-between;font:10px var(--mono);color:var(--muted)}.storage-caption strong{color:var(--ink)}.available-capacity{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;padding-top:12px;border-top:1px solid var(--instrument-line);color:var(--instrument-ink);font-size:11px}.available-capacity small{display:block;color:var(--instrument-muted);font-size:9px}.available-capacity strong{font:26px var(--mono);color:#d2f86b}
 @media(max-width:760px){.floating-stats{top:54px;padding:8px 12px;gap:8px 12px}.floating-stat{flex-basis:28%}.floating-stat strong{font-size:10px}}
+
+/* Quantum readouts follow the selected theme, including the last sample states. */
+:root[data-theme=dark] #qComputing.quantum-panel{background:#17231a;color:#edf3e7;border-color:#3c5039;box-shadow:inset 0 1px 0 #ffffff05}
+:root[data-theme=dark] .quantum-title{color:#edf3e7}
+:root[data-theme=dark] .quantum-title .icon{color:#c4e8a0}
+:root[data-theme=dark] .quantum-chip-count{color:#a2b89a;background:#263827;border-color:#3d5336}
+:root[data-theme=dark] .quantum-output-label,:root[data-theme=dark] .quantum-output>span,:root[data-theme=dark] .quantum-chip-notice,:root[data-theme=dark] .quantum-footnote{color:#a2b89a}
+:root[data-theme=dark] .quantum-output strong{color:#d3f29f}
+:root[data-theme=dark] .quantum-phase{color:#a9bc9d}
+:root[data-theme=dark] .quantum-readout[data-state=loss] .quantum-output strong{color:#ff9a92}
+:root[data-theme=dark] .quantum-readout[data-state=loss] .quantum-phase{color:#e7a79d}
+:root[data-theme=dark] .quantum-readout[data-state=flat] .quantum-output strong{color:#adbd9e}
+:root[data-theme=dark] .quantum-compute-row{border-color:#34482f}
+:root[data-theme=dark] .quantum-panel #btnQcompute[data-state=loss]{background:#3d2926;border-color:#775148;color:#ffb2a7}
+:root[data-theme=dark] .quantum-panel #btnQcompute[data-state=loss]:hover{background:#50332e}
+:root[data-theme=dark] .quantum-panel #btnQcompute[data-state=flat]{background:#2c3c25;border-color:#4a603d;color:#c2d4ad}
+:root[data-theme=dark] .quantum-last{background:#24351f;border-color:#435638;color:#d3f29f}
+:root[data-theme=dark] .quantum-last-heading,:root[data-theme=dark] .quantum-last-output>span,:root[data-theme=dark] .quantum-last-note{color:#a2b89a}
+:root[data-theme=dark] .quantum-last[data-state=loss]{background:#3d2926;border-color:#775148;color:#ffb2a7}
+:root[data-theme=dark] .quantum-last[data-state=loss] .quantum-last-heading,:root[data-theme=dark] .quantum-last[data-state=loss] .quantum-last-output>span,:root[data-theme=dark] .quantum-last[data-state=loss] .quantum-last-note{color:#e7a79d}
+:root[data-theme=dark] .quantum-last[data-state=flat]{background:#202d20;border-color:#3c5039;color:#adbd9e}
 </style>
 <script>
 window.upcIcon=name=>'<svg class="icon" aria-hidden="true"><use href="#i-'+name+'"></use></svg>';
@@ -10496,11 +10517,11 @@ function loadPrestige() {
   const floating=document.createElement('aside');
   floating.className='floating-stats';floating.hidden=true;floating.setAttribute('aria-label','Resource summary');
   document.querySelector('.topbar').after(floating);
-  const tracked=[['heroRate','Production rate',' clips / sec'],['heroWire','Wire available',' inches'],['heroFunds','Unused clips',''],['yomiDisplay','Yomi',''],['powerProductionRate','Production',' MWs'],['powerConsumptionRate','Consumption',' MWs']].map(([id,label,unit])=>{
+  const tracked=[['heroRate','Production rate',' clips / sec'],['heroWire','Wire available',' inches'],['heroFunds','Unused clips',''],['yomiDisplay','Yomi',''],['projectsReady','Ready to research','',true],['powerProductionRate','Production',' MWs',true],['powerConsumptionRate','Consumption',' MWs',true]].map(([id,label,unit,trackBelow=false])=>{
     const item=document.createElement('div');item.className='floating-stat';item.hidden=true;
     const heading=document.createElement('span');heading.textContent=label;
     const value=document.createElement('strong');item.append(heading,value);floating.append(item);
-    return {id,unit,item,value};
+    return {id,unit,item,value,trackBelow};
   });
   function renderFloating(){
     const edge=document.querySelector('.topbar').getBoundingClientRect().bottom;
@@ -10508,7 +10529,8 @@ function loadPrestige() {
     for(const entry of tracked){
       const source=$(entry.id),rect=source.getBoundingClientRect();
       const visible=source.getClientRects().length>0&&getComputedStyle(source).visibility==='visible';
-      entry.item.hidden=!visible||rect.bottom>edge||(entry.id==='heroFunds'&&window.humanFlag===1);
+      const outside=rect.bottom<=edge||(entry.trackBelow&&rect.top>=window.innerHeight);
+      entry.item.hidden=!visible||!outside||(entry.id==='heroFunds'&&window.humanFlag===1);
       if(!entry.item.hidden)entry.value.textContent=source.textContent+entry.unit;
     }
     floating.hidden=tracked.every(entry=>entry.item.hidden);
