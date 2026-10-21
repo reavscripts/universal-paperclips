@@ -158,6 +158,8 @@ body[data-phase=production] #swarmGiftDiv,body[data-phase=space] #swarmGiftDiv{m
 .wire-order{grid-template-columns:auto}#btnBuyWire.wire-price-card{min-width:104px;padding:10px 12px;text-align:left;line-height:1.5;color:var(--ink);transition:box-shadow .15s,transform .15s}#btnBuyWire .wire-price-label,#btnBuyWire .metric-label{display:block}#btnBuyWire .wire-buy-label{display:block;margin-top:8px;padding-top:6px;border-top:1px solid var(--line);font:600 9px var(--sans);color:var(--accent-ink)}#btnBuyWire:hover:not(:disabled){box-shadow:0 0 0 2px var(--accent-ink);transform:translateY(-1px)}#btnBuyWire:active:not(:disabled){transform:translateY(0)}#btnBuyWire:disabled .wire-buy-label{color:var(--muted);opacity:.65}
 
 #importError,#importRestoreError{padding:10px 12px;border:1px solid var(--loss-line);border-radius:7px;background:var(--loss-bg);color:var(--loss);font-size:12px}
+
+.floating-ops-meter{height:6px;margin-top:6px;border-radius:4px;background:var(--line);overflow:hidden}.floating-ops-fill{height:100%;width:0;border-radius:inherit;background:#658a37}:root[data-theme=dark] .floating-ops-fill{background:var(--accent)}
 </style>
 <script>
 window.upcIcon=name=>'<svg class="icon" aria-hidden="true"><use href="#i-'+name+'"></use></svg>';
@@ -10528,11 +10530,18 @@ function loadPrestige() {
   const floating=document.createElement('aside');
   floating.className='floating-stats';floating.hidden=true;floating.setAttribute('aria-label','Resource summary');
   document.querySelector('.topbar').after(floating);
-  const tracked=[['heroRate','Production rate',' clips / sec'],['heroWire','Wire available',' inches'],['heroFunds','Unused clips',''],['yomiDisplay','Yomi',''],['projectsReady','Ready to research',''],['powerProductionRate','Production',' MWs'],['powerConsumptionRate','Consumption',' MWs']].map(([id,label,unit])=>{
+  const tracked=[['heroRate','Production rate',' clips / sec'],['heroWire','Wire available',' inches'],['heroFunds','Unused clips',''],['yomiDisplay','Yomi',''],['operations','Operations',''],['creativity','Creativity',''],['projectsReady','Ready to research',''],['powerProductionRate','Production',' MWs'],['powerConsumptionRate','Consumption',' MWs']].map(([id,label,unit])=>{
     const item=document.createElement('div');item.className='floating-stat';item.hidden=true;
     const heading=document.createElement('span');heading.textContent=label;
     const value=document.createElement('strong');item.append(heading,value);floating.append(item);
-    return {id,unit,item,value};
+    let progress=null,fill=null;
+    if(id==='operations'){
+      item.id='floatingOperations';
+      progress=document.createElement('div');progress.className='floating-ops-meter';
+      progress.setAttribute('role','progressbar');progress.setAttribute('aria-label','Operations capacity');progress.setAttribute('aria-valuemin','0');progress.setAttribute('aria-valuemax','100');
+      fill=document.createElement('div');fill.className='floating-ops-fill';progress.append(fill);item.append(progress);
+    }
+    return {id,unit,item,value,progress,fill};
   });
   function renderFloating(){
     const edge=document.querySelector('.topbar').getBoundingClientRect().bottom;
@@ -10542,7 +10551,17 @@ function loadPrestige() {
       const visible=source.getClientRects().length>0&&getComputedStyle(source).visibility==='visible';
       const outside=rect.bottom<=edge;
       entry.item.hidden=!visible||!outside||(entry.id==='heroFunds'&&window.humanFlag===1);
-      if(!entry.item.hidden)entry.value.textContent=source.textContent+entry.unit;
+      if(!entry.item.hidden){
+        entry.value.textContent=source.textContent+entry.unit;
+        if(entry.progress){
+          const maximum=Math.max(0,finite(window.memory)*1000),current=Math.max(0,finite(window.operations));
+          const percentage=maximum>0?clamp(current/maximum*100):0;
+          entry.value.textContent=source.textContent+' / '+$('maxOps').textContent;
+          entry.fill.style.width=percentage+'%';
+          entry.progress.setAttribute('aria-valuenow',String(Math.round(percentage)));
+          entry.progress.setAttribute('aria-valuetext',entry.value.textContent+' operations');
+        }
+      }
     }
     floating.hidden=tracked.every(entry=>entry.item.hidden);
   }
