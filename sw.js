@@ -1,7 +1,7 @@
 /* Offline shell only. Saves stay in the original game's localStorage. */
 'use strict';
 const PREFIX='universal-paperclips:'+self.registration.scope+':';
-const CACHE=PREFIX+'af273483babde617';
+const CACHE=PREFIX+'46025475a4b95fbb';
 const SHELL=new URL('index.html',self.registration.scope).href;
 const ASSETS=['index.html','manifest.webmanifest','icon-192.png','icon-512.png','icon-maskable.png','apple-touch-icon.png'].map(name=>new URL(name,self.registration.scope).href);
 self.addEventListener('install',event=>{
