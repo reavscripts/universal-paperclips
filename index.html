@@ -10579,10 +10579,15 @@ function loadPrestige() {
   const keys = [...requiredKeys,'savePrestige'];
   let toastTimer, lastSave = localStorage.getItem('saveGame'), pendingImport = null;
   function toast(text) {
+    // A modal's backdrop blurs everything outside its top-layer subtree.
+    const dialog=Array.from(document.querySelectorAll('dialog[open]')).at(-1);
+    const host=dialog ? dialog.querySelector('.dialog-body')||dialog : document.body;
+    host.appendChild($('toast'));
     $('toast').textContent = text;
     $('toast').hidden = false;
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => {$('toast').hidden = true;}, 4200);
+    if(dialog)requestAnimationFrame(()=>{if(dialog.open)$('toast').scrollIntoView({block:'nearest'});});
   }
   function saved() {
     $('saveStatusText').textContent = 'Saved just now';
