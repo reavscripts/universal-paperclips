@@ -47,13 +47,15 @@
       chords:[[40,52,59,66],[36,48,55,62],[43,55,62,69],[38,50,57,64]],
       melody:[[76,71,78,79,null,78,74,71,76,78,83,79,78,null,74,71],[76,72,79,83,null,79,78,74,76,79,84,83,79,null,78,74],[79,74,81,83,null,81,78,74,79,81,86,83,81,null,78,74],[78,74,81,78,null,76,74,69,78,81,83,81,78,76,74,null]]}
   };
-  const phase=()=>window.spaceFlag===1?'space':window.humanFlag===1?'business':'production';
+  const phase=()=>Number(window.spaceFlag)===1?'space':Number(window.humanFlag)===1?'business':'production';
   function showScore(){const score=scores[phase()];$('musicEnabled').closest('label').querySelector('small').textContent=score.title+' · '+score.bpm+' BPM · '+(phase()==='space'?'Space':phase()==='production'?'Production':'Business');}
   showScore();setInterval(showScore,500);
   function fadeVoices(){
     const now=context.currentTime;
     for(const voice of voices){
-      voice.envelope.gain.cancelAndHoldAtTime(now);
+      // Older WebKit versions do not implement cancelAndHoldAtTime.
+      if(typeof voice.envelope.gain.cancelAndHoldAtTime==='function')voice.envelope.gain.cancelAndHoldAtTime(now);
+      else {const level=voice.envelope.gain.value;voice.envelope.gain.cancelScheduledValues(now);voice.envelope.gain.setValueAtTime(level,now);}
       voice.envelope.gain.setTargetAtTime(0,now,.14);
       for(const tone of voice.oscillators){try{tone.stop(now+.7);}catch(_){}}
     }
@@ -61,14 +63,15 @@
   const frequency=midi=>440*Math.pow(2,(midi-69)/12);
   function note(midi,when,length,level,pad=false){
     const envelope=context.createGain(),filter=context.createBiquadFilter();
-    filter.type='lowpass';filter.frequency.value=pad?700:1800;filter.Q.value=.3;
+    const industrial=currentScore==='production',cosmic=currentScore==='space';
+    filter.type='lowpass';filter.frequency.value=pad?700:industrial?1200:cosmic?2200:1800;filter.Q.value=.3;
     envelope.gain.setValueAtTime(0,when);
     envelope.gain.linearRampToValueAtTime(level,when+(pad ? .55 : .018));
     envelope.gain.exponentialRampToValueAtTime(.0001,when+length);
     filter.connect(envelope);envelope.connect(ambient);
     const oscillators=[1,2,3].map((harmonic,i)=>{
-      const tone=context.createOscillator(),gain=context.createGain();tone.type='sine';tone.frequency.value=frequency(midi)*harmonic;
-      gain.gain.value=[1,.18,.045][i];tone.connect(gain);gain.connect(filter);tone.start(when);tone.stop(when+length+.05);
+      const tone=context.createOscillator(),gain=context.createGain();tone.type=industrial&&!pad&&i===0?'triangle':'sine';tone.frequency.value=frequency(midi)*harmonic;
+      gain.gain.value=(cosmic?[1,.3,.09]:industrial?[.85,.12,.035]:[1,.18,.045])[i];tone.connect(gain);gain.connect(filter);tone.start(when);tone.stop(when+length+.05);
       tone.onended=()=>{tone.disconnect();gain.disconnect();};return tone;
     });
     const voice={oscillators,envelope,filter};voices.add(voice);

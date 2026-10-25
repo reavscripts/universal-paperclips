@@ -81,6 +81,13 @@
   $('battleCanvasDiv').querySelector('.panel-header').insertAdjacentHTML('afterend','<div class="combat-brief"><span>TACTICAL FEED</span><strong id="combatReadiness"></strong></div>');
   function render(){
     renderNavigation();
+    const momentum=$('droneMomentum');
+    momentum.hidden=Number(window.humanFlag)!==0||Number(window.spaceFlag)===1||Number(window.momentum)!==1;
+    if(!momentum.hidden){
+      const performance=Math.max(0,Number(window.powMod)||0)*100;
+      write($('droneMomentumValue'),performance.toLocaleString('en-US',{maximumFractionDigits:1})+'%');
+      write($('droneMomentumNote'),performance>=100?'+'+(performance-100).toLocaleString('en-US',{maximumFractionDigits:1})+'% speed · grows while fully powered':'Power limited · restore energy to build momentum');
+    }
     write($('prestigeUcounter'),String((Number(window.prestigeU)||0)+1));
     write($('prestigeScounter'),String((Number(window.prestigeS)||0)+1));
     const running=window.tourneyInProg===1&&$('btnRunTournament').disabled;
@@ -90,5 +97,6 @@
     $('tournamentLabel').hidden=!running&&!prepared&&!complete;
     write($('combatReadiness'),'Combat power '+(Number(window.probeCombat)||0));
   }
+  $('wireProductionDiv').querySelector('.panel-body').insertAdjacentHTML('afterbegin','<div class="instrument" id="droneMomentum" hidden><div class="instrument-kicker">Momentum · drone & factory speed</div><div class="instrument-value" id="droneMomentumValue">100%</div><div class="instrument-note" id="droneMomentumNote"></div></div>');
   render();setInterval(render,250);
 })();
