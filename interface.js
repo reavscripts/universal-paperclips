@@ -62,7 +62,6 @@
   toggle.addEventListener('click',()=>{abbreviated=!abbreviated;renderCount();});
   new MutationObserver(renderCount).observe($('clips'),{childList:true,characterData:true,subtree:true});renderCount();
   const strategy=$('strategyEngine').querySelector('.panel-body');
-  $('tournamentLabel').insertAdjacentHTML('beforebegin','<div class="strategy-progress"><strong id="strategyState"></strong><progress id="strategyProgress" max="100" value="0" aria-label="Tournament progress"></progress><p id="strategyDetail"></p></div>');
   const resultBox=document.createElement('div');resultBox.className='strategy-result';resultBox.setAttribute('role','status');resultBox.setAttribute('aria-live','polite');resultBox.textContent='No tournament results yet.';
   strategy.querySelector('.instrument-note').replaceWith(resultBox);
   let lastReward=null;
@@ -89,11 +88,6 @@
     const complete=window.resultsFlag===1;
     $('tournamentStuff').hidden=!running&&!prepared&&!complete;
     $('tournamentLabel').hidden=!running&&!prepared&&!complete;
-    const round=Number(window.currentRound)||0,total=Number(window.rounds)||1;
-    write($('strategyState'),running?'Tournament running':prepared?'Choose your strategy':complete?'Tournament complete':'Create a tournament');
-    $('strategyProgress').value=running?Math.min(100,round/total*100):complete?100:0;
-    const selected=$('stratPicker').selectedOptions[0]?.textContent||'No strategy';
-    write($('strategyDetail'),running?'Match '+Math.min(round+1,total)+' of '+total+' · '+selected:prepared?'Select a strategy above, then press Run.':complete?(lastReward===null?'Review the scores below.': '+'+lastReward.toLocaleString('en-US')+' Yomi earned. Review the scores below.'):'Use New Tournament below · '+$('newTourneyCost').textContent+' operations required.');
     write($('combatReadiness'),'Combat power '+(Number(window.probeCombat)||0));
   }
   render();setInterval(render,250);

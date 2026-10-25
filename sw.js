@@ -1,7 +1,7 @@
 /* Versioned offline shell. Saves remain exclusively in localStorage. */
 'use strict';
 const PREFIX='universal-paperclips:'+self.registration.scope+':';
-const CACHE=PREFIX+'audio-20261025-v5';
+const CACHE=PREFIX+'strategy-20261025-v6';
 const SHELL=new URL('index.html',self.registration.scope).href;
 const ASSETS=['index.html','interface.css','interface.js','settings.js','manifest.webmanifest','icon-192.png','icon-512.png','icon-maskable.png','apple-touch-icon.png'].map(name=>new URL(name,self.registration.scope).href);
 async function fetchFile(url){
