@@ -25,6 +25,8 @@
   for (const group of groups) {
     for(const id of group.panels) if($(id)) $(id).dataset.section=group.id;
     const button=document.createElement('button');button.type='button';button.innerHTML='<svg class="icon" aria-hidden="true"><use href="#i-'+group.icon+'"></use></svg><span>'+group.label+'</span><span class="nav-badge" hidden></span>';
+    if(group.id==='research')button.insertAdjacentHTML('beforeend','<span class="nav-badge nav-points" hidden></span>');
+    if(group.id==='production')button.querySelector('.nav-badge').classList.add('nav-stopped');
     button.addEventListener('click',()=>{active=group.id;renderNavigation();$('resources').scrollIntoView({behavior:'instant',block:'start'});});
     group.button=button;nav.append(button);
   }
@@ -33,11 +35,18 @@
   function renderNavigation(){
     const available=groups.filter(g=>g.panels.some(unlocked));
     if(!available.some(g=>g.id===active)) active=available[0]?.id||'production';
-    const notices={production:window.humanFlag===1&&window.wire<1?'!':window.humanFlag!==1&&window.powMod<1?'!':'',research:String(document.querySelectorAll('#projectListTop button:not(:disabled)').length||''),strategy:unlocked('strategyEngine')&&!$('btnNewTournament').disabled?'1':'',space:unlocked('probeDesignDiv')&&window.probeTrust>window.probeUsedTrust?'!':''};
+    const points=unlocked('compDiv')?Math.max(0,Math.floor(window.humanFlag===1?Number(window.trust)-Number(window.processors)-Number(window.memory):Number(window.swarmGifts))):0;
+    const stopped=Number(window.clipRate)<=0||(window.humanFlag===1&&Number(window.wire)<1);
+    const notices={production:stopped?'!':'',research:unlocked('projectsDiv')?String(document.querySelectorAll('#projectListTop button:not(:disabled)').length||''):'',strategy:unlocked('strategyEngine')&&!$('btnNewTournament').disabled?'1':'',space:unlocked('probeDesignDiv')&&window.probeTrust>window.probeUsedTrust?'!':''};
     for(const group of groups){
       group.button.hidden=!available.includes(group);group.button.setAttribute('aria-pressed',String(active===group.id));
       const badge=group.button.querySelector('.nav-badge'),notice=notices[group.id];badge.hidden=!notice;write(badge,notice);
       group.button.setAttribute('aria-label',group.label+(notice?' · '+(notice==='!'?'Needs attention':notice+' available actions'):''));
+      if(group.id==='production'){badge.title='Production stopped';group.button.setAttribute('aria-label','Production'+(stopped?' · Production stopped':''));}
+      if(group.id==='research'){
+        const pointBadge=group.button.querySelector('.nav-points');pointBadge.hidden=!points;write(pointBadge,String(points));pointBadge.title=points+' points available';badge.title=(notice||0)+' research projects ready';
+        group.button.setAttribute('aria-label','Research · '+points+' points available · '+(notice||0)+' research projects ready');
+      }
       for(const id of group.panels)if($(id))$(id).dataset.mobileHidden=String(mobile.matches&&active!==group.id);
     }
   }
@@ -53,12 +62,22 @@
   toggle.addEventListener('click',()=>{abbreviated=!abbreviated;renderCount();});
   new MutationObserver(renderCount).observe($('clips'),{childList:true,characterData:true,subtree:true});renderCount();
   const strategy=$('strategyEngine').querySelector('.panel-body');
-  strategy.insertAdjacentHTML('afterbegin','<p class="strategy-guide"><strong>Turn operations into Yomi.</strong> Create a tournament, choose a strategy, then run it. Your strategy’s score and the opponents it beats determine the reward.</p>');
   $('tournamentLabel').insertAdjacentHTML('beforebegin','<div class="strategy-progress"><strong id="strategyState"></strong><progress id="strategyProgress" max="100" value="0" aria-label="Tournament progress"></progress><p id="strategyDetail"></p></div>');
-  $('tournamentStuff').insertAdjacentHTML('afterend','<details class="strategy-help"><summary>How to read the match</summary><p>Rows are the first player’s moves; columns are the second player’s moves. Each cell shows their respective points: row player, column player. The highlighted cell is the move being played. Every pair of strategies plays ten moves; the final table ranks their total scores.</p><p>Yomi funds upgrades. New strategies are unlocked through Projects. Creating a tournament spends the operations shown below; running it completes the matches automatically.</p></details>');
+  const resultBox=document.createElement('div');resultBox.className='strategy-result';resultBox.setAttribute('role','status');resultBox.setAttribute('aria-live','polite');resultBox.textContent='No tournament results yet.';
+  strategy.querySelector('.instrument-note').replaceWith(resultBox);
   let lastReward=null;
   const declareWinner=window.declareWinner;
-  window.declareWinner=function(...args){const before=window.yomi;const result=declareWinner.apply(this,args);lastReward=window.yomi-before;return result;};
+  window.declareWinner=function(...args){
+    const before=window.yomi,messages=[],displayMessage=window.displayMessage;
+    window.displayMessage=function(message,...rest){messages.push(String(message));return displayMessage.call(this,message,...rest);};
+    let result;
+    try{result=declareWinner.apply(this,args);}finally{window.displayMessage=displayMessage;}
+    lastReward=window.yomi-before;
+    const selected=window.strats[Number(window.pick)];
+    const summary=messages.length?messages.join(' '):selected?selected.name+' scored '+selected.currentScore+'.':'Tournament complete.';
+    write(resultBox,summary+' Total reward: +'+lastReward.toLocaleString('en-US')+' Yomi.');
+    return result;
+  };
   document.querySelector('.exploration-instrument').insertAdjacentHTML('afterend','<p class="space-brief">Expand your reach. Speed explores faster; Exploration opens access to matter. Balance replication and hazard protection to keep your fleet growing.</p>');
   $('battleCanvasDiv').querySelector('.panel-header').insertAdjacentHTML('afterend','<div class="combat-brief"><span>TACTICAL FEED</span><strong id="combatReadiness"></strong></div>');
   function render(){
