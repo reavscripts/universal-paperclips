@@ -1,9 +1,9 @@
 /* Offline shell only. Saves stay in the original game's localStorage. */
 'use strict';
 const PREFIX='universal-paperclips:'+self.registration.scope+':';
-const CACHE=PREFIX+'cf3b02c312ed0d0e';
+const CACHE=PREFIX+'interface-20261025-v1';
 const SHELL=new URL('index.html',self.registration.scope).href;
-const ASSETS=['index.html','manifest.webmanifest','icon-192.png','icon-512.png','icon-maskable.png','apple-touch-icon.png'].map(name=>new URL(name,self.registration.scope).href);
+const ASSETS=['index.html','interface.css','interface.js','manifest.webmanifest','icon-192.png','icon-512.png','icon-maskable.png','apple-touch-icon.png'].map(name=>new URL(name,self.registration.scope).href);
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS.map(url=>new Request(url,{cache:'reload'})))));
   // A running game is never reloaded or replaced by an update.
