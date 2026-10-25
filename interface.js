@@ -4,6 +4,10 @@
   const $ = id => document.getElementById(id);
   const write = (node, value) => { if (node.textContent !== value) node.textContent = value; };
   const mobile = matchMedia('(max-width:760px)');
+  // Both engine-owned stat groups share one desktop row, including unlocked resources.
+  const metrics=document.createElement('div');metrics.className='hero-metrics';
+  const primaryStats=document.querySelector('.hero>.hero-stats');
+  primaryStats.before(metrics);metrics.append(primaryStats,$('heroResourceStats'));
   window.battleLEFTCOLOR='#d5f8e7';window.battleRIGHTCOLOR='#ffb3a4';window.battleEXPLODECOLOR='#9fe9dd';
   const groups = [
     {id:'production', label:'Production', icon:'factory', panels:['businessDiv','manufacturingDiv','creationDiv','wireProductionDiv','powerDiv']},
